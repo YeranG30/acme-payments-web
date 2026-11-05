@@ -1,0 +1,5 @@
+[
+  {"name": "one item, no code", "cart": {"items": [{"sku": "mug", "quantity": 1, "unit_cents": 1250}], "region": "US-CA"}},
+  {"name": "two items, WELCOME10", "cart": {"items": [{"sku": "mug", "quantity": 2, "unit_cents": 1250}, {"sku": "tee", "quantity": 1, "unit_cents": 1999}], "region": "GB", "discount_code": "WELCOME10"}},
+  {"name": "invalid region is a 400", "cart": {"items": [{"sku": "mug", "quantity": 1, "unit_cents": 1250}], "region": "XX"}}
+]
