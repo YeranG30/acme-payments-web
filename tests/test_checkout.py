@@ -42,3 +42,7 @@ def test_regions(region, tax):
 def test_invalid_carts(bad):
     with pytest.raises(CheckoutError):
         quote(cart(**bad))
+
+
+def test_discount_code_is_normalised():
+    assert quote(cart(discount_code=" welcome10 ")) == quote(cart(discount_code="WELCOME10"))
