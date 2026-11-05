@@ -1,0 +1,56 @@
+name: Deploy production
+
+# Manual. The production environment requires an approval from a release approver
+# before the deploy job starts.
+
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: production
+  cancel-in-progress: false
+
+permissions: {}
+
+jobs:
+  deploy:
+    name: Deploy to production
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment:
+      name: production
+      url: ${{ vars.STATUS_PAGE_URL }}
+    permissions:
+      contents: read
+      id-token: write
+      issues: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.12"
+
+      - name: Cloud login (OIDC)
+        if: vars.CLOUD_LOGIN == 'on'
+        uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd # v6.3.0
+        with:
+          role-to-assume: ${{ vars.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: ${{ vars.AWS_REGION }}
+
+      - name: Release
+        env:
+          DEPLOY_TOKEN: ${{ secrets.PROD_DEPLOY_TOKEN }}
+        run: |
+          echo "Release controller: production <- $GITHUB_SHA (deploy token present: ${DEPLOY_TOKEN:+yes})"
+
+      - name: Health check
+        run: python -m scripts.smoke --json > smoke.json || true
+
+      - name: Status page
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python -m scripts.status_page production smoke.json > status.md
+          gh issue edit "${{ vars.STATUS_ISSUE }}" --body-file status.md
