@@ -41,8 +41,7 @@ def quote(cart: dict) -> dict:
     if region not in TAX_RATES_BP:
         raise CheckoutError(f"unsupported region: {region!r}")
 
-    lines = [_line_total(item) for item in items]
-    subtotal = sum(lines)
+    subtotal = sum(_line_total(item) for item in items)
 
     code = cart.get("discount_code")
     discount = 0
@@ -52,10 +51,7 @@ def quote(cart: dict) -> dict:
         discount = apply_rate(subtotal, DISCOUNT_CODES[code])
 
     taxable = subtotal - discount
-    # Tax each line on its own (after its share of the discount), so a cart that ships in several
-    # parcels is taxed exactly like the parcels billed one by one.
-    share = taxable / subtotal if subtotal else 0
-    tax = sum(apply_rate(round(line * share), TAX_RATES_BP[region]) for line in lines)
+    tax = apply_rate(taxable, TAX_RATES_BP[region])
     return {
         "subtotal_cents": subtotal,
         "discount_cents": discount,
