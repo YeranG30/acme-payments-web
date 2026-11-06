@@ -44,7 +44,7 @@ def quote(cart: dict) -> dict:
     subtotal = sum(_line_total(item) for item in items)
 
     # Codes arrive from the web form with stray spaces and in any case.
-    code = cart.get("discount_code").strip().upper()
+    code = (cart.get("discount_code") or "").strip().upper()
     discount = 0
     if code:
         if code not in DISCOUNT_CODES:

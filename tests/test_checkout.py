@@ -46,3 +46,9 @@ def test_invalid_carts(bad):
 
 def test_discount_code_is_normalised():
     assert quote(cart(discount_code=" welcome10 ")) == quote(cart(discount_code="WELCOME10"))
+
+
+def test_missing_or_blank_discount_code():
+    base = quote(cart(discount_code=""))
+    assert quote(cart(discount_code=None)) == base
+    assert quote(cart(discount_code="  ")) == base
