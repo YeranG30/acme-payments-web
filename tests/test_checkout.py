@@ -44,5 +44,10 @@ def test_invalid_carts(bad):
         quote(cart(**bad))
 
 
+@pytest.mark.parametrize("code", [None, "", "   "])
+def test_missing_or_blank_discount_code_means_no_discount(code):
+    assert quote(cart(discount_code=code))["discount_cents"] == 0
+
+
 def test_discount_code_is_normalised():
     assert quote(cart(discount_code=" welcome10 ")) == quote(cart(discount_code="WELCOME10"))
